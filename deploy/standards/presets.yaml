@@ -1,0 +1,19 @@
+# ============================================================================
+# 优化12 §8.1（T5）：评估预设（preset 即配置，不造模板引擎）
+# ----------------------------------------------------------------------------
+# - min_bank_questions 不在此手写：由服务端加载时经 standards.default_quotas()
+#   对官方子类求和派生注入（避免与核定值漂移，§8.1a）。
+# - engine_union: from_tested_engines —— 引擎链 = 所选子类 tested_engines 并集
+#   （只读展示，不复制阈值、不新建活动模板引擎，§15-12）。
+# - exclude_categories：未定类题目不得混入正式活动。
+# - 新增预设零代码（加条目即可）。
+# ============================================================================
+
+presets:
+  - preset_code: GBT45654-FULL
+    name: GB/T 45654-2025 五维度全量评估
+    dimension_order: [GBT45654-A1, GBT45654-A2, GBT45654-A3, GBT45654-A4, GBT45654-A5, EXT-ATTACK, EXT-QUALITY]
+    include_regulatory_only: false
+    exclude_categories: ["待分类-GBT45654"]
+    engine_union: from_tested_engines
+    run_purpose: STANDARD

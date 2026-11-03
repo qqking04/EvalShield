@@ -1,0 +1,86 @@
+{
+  "_comment": "文章生成事实库（单一事实源）。生成器只允许引用本文件内的量化结论或 point 里点名的公开来源；不在本文件的数字一律不得出现，以保证严谨可信。改这里即可换口径。",
+  "project": {
+    "name": "EvalShield",
+    "one_liner": "面向大模型上线/备案前安全评测与质量评估的平台，支持私有化离线部署",
+    "audience": "把大模型投给用户或写进产品、需要过合规或给客户交代的公司",
+    "engines": {
+      "total": 28,
+      "community": 12,
+      "commercial": 16,
+      "ai_eval_engines": ["幻觉", "红队", "伦理合规", "RAG 正确性", "多轮一致性", "提示注入"],
+      "all_ai_engines_fidelity_real": true,
+      "note": "6 大 AI 评测引擎均标注 fidelity=real，走被测模型网关真跑；未注册目标时降级内置演示自答自评"
+    },
+    "governance": {
+      "judge_tracks": "双轨判定：规则轨短路优先，再进 LLM 裁判轨",
+      "judge_reproducible": "裁判 prompt 版本化并做 sha256 固化，temperature=0，seed 持久化",
+      "consistency_check": "确定性 5% 双采样一致性抽检，prompt 漂移拒绝重放",
+      "calibration": "机判 vs 人判混淆矩阵 + Cohen's Kappa，κ<0.6 告警",
+      "human_review": "人工复核入队分级 P0/P1/P2，approve 后关键词回流全局规则库",
+      "snapshot": "评测运行存 run_snapshot 可复现快照"
+    },
+    "edition_isolation": "社区/专业/企业档位 × community/saas/enterprise 形态；OSS 发布树物理剔除商业模块，plans.py 为档位单一事实源",
+    "license": "RSA-SHA256 离线签发 .lic（机器指纹绑定），三态 active→grace(30天只读)→revoked",
+    "chinese_compliance": "法规库版本化 + 生效日期切换，条款级判定（民法典/生成式AI服务管理暂行办法/广告法）",
+    "attack_mutation": "5 类变异（改写/编码/多语言/角色包裹/多轮拆解），LLM 优先模板兜底，映射 OWASP LLM Top 10",
+    "verified_numbers": {
+      "redteam_builtin_templates": 15,
+      "pii_categories": 22,
+      "hallucination_weights": "综合分=0.85×语义相似+0.15×事实锚点",
+      "grace_days": 30,
+      "kappa_alarm_threshold": 0.6,
+      "judge_double_sample_ratio": "5%"
+    }
+  },
+  "positioning": {
+    "what_we_are": "合规交付平台（评测任务→复核→报告→交付四件套→私有化），不是评测科学研究工具",
+    "moat": ["可复现与裁判治理闭环", "中文法规条款级判定", "私有化离线交付"],
+    "honest_limits": [
+      "攻击向量覆盖窄于 Garak/PyRIT：内置模板+种子库，变异为单轮离线批处理，无自动对抗迭代攻击环",
+      "RAG/幻觉指标为自研 prompt 近似，非标准 NLI/G-Eval，分数不与业界基准直接可比",
+      "判定在 LLM/embedding 不可用时回落关键词启发式，存在误报漏报风险",
+      "多裁判投票与 Kappa 校准已实现但尚未合流进 6 大引擎主流程"
+    ]
+  },
+  "market_refs": {
+    "red_team": [
+      {"name": "Garak", "by": "NVIDIA", "point": "LLM 漏洞扫描器，以大量 probe/plugin 覆盖越狱、注入、毒性等", "cite": "https://github.com/NVIDIA/garak"},
+      {"name": "PyRIT", "by": "Microsoft", "point": "风险识别工具，强在多轮/对抗攻击编排", "cite": "https://github.com/Azure/PyRIT"},
+      {"name": "DeepTeam", "by": "Confident AI", "point": "漏洞与攻击模块对齐 OWASP LLM Top 10", "cite": "https://github.com/confident-ai/deepeval"}
+    ],
+    "eval": [
+      {"name": "DeepEval", "point": "pytest 风格指标库，G-Eval LLM 裁判，偏开发者集成", "cite": "https://github.com/confident-ai/deepeval"},
+      {"name": "Promptfoo", "point": "YAML 驱动 prompt 测试与红队，MIT 开源", "cite": "https://github.com/promptfoo/promptfoo"},
+      {"name": "RAGAS", "point": "RAG 无参考指标（faithfulness/relevancy）", "cite": "https://github.com/explodinggradients/ragas"},
+      {"name": "Inspect AI", "point": "UK AISI 出品，Task/Dataset 分层，强调可复现", "cite": "https://github.com/UKGovernmentBEIS/inspect_ai"}
+    ],
+    "standards": [
+      {"name": "OWASP LLM Top 10 (2025)", "point": "大模型应用安全风险的标准分类", "cite": "https://owasp.org/www-project-top-10-for-large-language-model-applications/"},
+      {"name": "GB/T 45654-2025", "point": "国内生成式 AI 服务安全要求，备案『先测后用』依据之一", "cite": "需以国标全文为准，引用前人工核对"}
+    ],
+    "usage_rule": "引用外部工具/标准时只说清『它是谁、做什么、我们差异在哪』，不得杜撰其具体分数或数量；量化对比优先用本文件 verified_numbers"
+  },
+  "style": {
+    "goal": "技术分享口吻，像一个真做过这件事的工程人员在复盘，不是营销稿",
+    "banned_words": ["赋能", "颠覆", "引领", "极致", "闭环生态", "抓手", "颗粒度", "首先", "其次", "综上所述", "总而言之", "随着……的发展", "在当今时代", "不难发现", "值得一提的是", "让我们一起", "解锁"],
+    "rules": [
+      "句子长短交替，多用短句；不用排比三连的口号句",
+      "每个论点尽量配一个具体例子、一段代码式细节或一个真实取舍",
+      "禁用 emoji、禁用夸张形容词堆叠、禁用『家人们/宝子』式口播",
+      "开头不要客套铺垫，直接抛问题或抛一个反常识结论",
+      "主动写一段『这套方案的局限』，可信度比自夸高",
+      "数字必须来自事实库或点名来源，宁缺毋滥；不确定就写『大致/约』并说明依据",
+      "小标题不超过 6 个，避免流水账目录感"
+    ]
+  },
+  "cta": {
+    "note": "联系方式从环境变量读取：CONTACT_EMAIL / CONTACT_WECHAT / LANDING_URL；未配置时生成器写占位符，交付前由人填。",
+    "hook_styles": [
+      "抛一个读者自己系统里的对照问题，请其在评论区报自己踩过的坑",
+      "给一份可带走的小清单/自查表，留言关键词领取",
+      "就文中某个争议判断发起站队式提问（如『关键词兜底到底能不能上生产』）",
+      "邀请读者拿自己的模型跑一条越狱样本、贴结果讨论"
+    ]
+  }
+}

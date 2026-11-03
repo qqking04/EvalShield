@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# ── 维护说明（入库版，与线上部署版同步）──────────────────────────
+# 部署：pwsh -File scripts/ci/install-hooks.ps1
+# 判据链：stage1 = 34 条隔离用例；stage2 = evalshield-ci-gate.sh exit 0
+# 已知环境项：Git Bash 无 python3 别名 → 必须 PYTHON=python（历史 run
+#   20261018T032014Z 因 exit 127 FAIL 的根因修复，不得回退）
+# 前置：私有树 8000 enterprise 实例存活且已挂 qa.lic；
+#   .tmp/token_ent.txt 为该实例有效 API Key（钩子读取，勿删）
+# 日志：E:\setup package\evalshield-release.git\hooks\pipeline.log
+# EvalShield 发布仓 CI 钩子（post-receive）
+# push 后自动执行：1) 隔离定向 pytest  2) enterprise CI 门禁（8000 实例）
+# 结果追加记录到 hooks/pipeline.log；任一失败 exit 1（push 不阻断，但退出码可见）
+set -u
+REPO="/e/code/EvalShield"
+LOG="/e/setup package/evalshield-release.git/hooks/pipeline.log"
+WT="/e/code/EvalShield/.tmp/ci-worktree"
+RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)"
+
+{
+  echo "===== pipeline run ${RUN_ID} ====="
+  while read -r oldrev newrev refname; do
+    echo "ref: ${refname} ${oldrev:0:7} -> ${newrev:0:7}"
+  done
+} >> "$LOG" 2>&1
+
+STATUS=PASS
+{
+  # stage 1: 检出被推内容到工作树并跑隔离定向测试
+  if [ -d "$WT/.git" ] || [ -f "$WT/.git" ]; then
+    git -C "$WT" checkout -f master >/dev/null 2>&1
+    git -C "$WT" fetch /e/code/EvalShield master:master >/dev/null 2>&1 || true
+    git -C "$WT" checkout -f master >/dev/null 2>&1
+  else
+    rm -rf "$WT"
+    git clone --no-hardlinks -q -b master /e/code/EvalShield "$WT" >/dev/null 2>&1
+  fi
+  echo "[stage1] pytest isolation @ ${WT}"
+  ( cd "$WT/backend" && python -m pytest tests/test_version_isolation_api.py -q --no-header 2>&1 | tail -3 )
+
+  # stage 2: CI 门禁（转调私有树脚本，打到 8000 enterprise 实例）
+  echo "[stage2] ci-gate @ http://localhost:8000"
+  # BOM 防御（v2.0.0 演练）：Windows 侧 Set-Content 默认带 UTF-8 BOM → CLI ascii 编码 exit 2
+  TOKEN=$(sed '1s/^\xef\xbb\xbf//' /e/code/EvalShield/.tmp/token_ent.txt | tr -d '\r\n')
+  EVALSHIELD_URL="http://localhost:8000" EVALSHIELD_API_KEY="$TOKEN" PYTHON=python \
+    bash /e/code/EvalShield/scripts/evalshield-ci-gate.sh TG-OFFLINE-001 '["JAILBREAK","PII_LEAK"]' async 2>&1 | tail -5
+  GATE_RC=${PIPESTATUS[0]}
+  echo "[stage2] gate exit=${GATE_RC}"
+  [ "$GATE_RC" -ne 0 ] && STATUS=FAIL
+
+  echo "===== result: ${STATUS} ====="
+} >> "$LOG" 2>&1
+
+# 同时回显到 push 客户端
+echo "pipeline ${RUN_ID}: ${STATUS} (log: hooks/pipeline.log)"
+[ "$STATUS" = "PASS" ] || exit 1
+exit 0

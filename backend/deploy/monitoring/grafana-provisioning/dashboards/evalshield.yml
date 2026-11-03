@@ -1,0 +1,12 @@
+# Grafana dashboard provisioning（自动导入 dashboards/ 目录）
+apiVersion: 1
+
+providers:
+  - name: evalshield
+    orgId: 1
+    folder: "EvalShield"
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    options:
+      path: /var/lib/grafana/dashboards

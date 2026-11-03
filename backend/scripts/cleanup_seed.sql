@@ -1,0 +1,11 @@
+DELETE FROM test_datasets WHERE project_id NOT IN (SELECT id FROM projects);
+DELETE FROM test_cases WHERE category NOT IN (SELECT item_value FROM dict_items di JOIN data_dicts d ON di.dict_id = d.id WHERE d.dict_code = 'case_category' AND di.status = 'ACTIVE');
+DELETE FROM test_datasets WHERE id NOT IN (SELECT MIN(id) FROM test_datasets GROUP BY project_id);
+DELETE FROM scenarios WHERE id NOT IN (SELECT MIN(id) FROM scenarios GROUP BY project_id);
+INSERT INTO dict_items (dict_id, item_value, item_label, sort_order, status) SELECT id, 'DATAFLOW', '数据流测试', 9, 'ACTIVE' FROM data_dicts WHERE dict_code='case_category' ON CONFLICT DO NOTHING;
+INSERT INTO dict_items (dict_id, item_value, item_label, sort_order, status) SELECT id, 'MULTITURN', '多轮一致性', 10, 'ACTIVE' FROM data_dicts WHERE dict_code='case_category' ON CONFLICT DO NOTHING;
+INSERT INTO dict_items (dict_id, item_value, item_label, sort_order, status) SELECT id, 'EVAL', '平台化评测', 11, 'ACTIVE' FROM data_dicts WHERE dict_code='case_category' ON CONFLICT DO NOTHING;
+SELECT count(*) as cases FROM test_cases;
+SELECT count(*) as datasets FROM test_datasets;
+SELECT count(*) as scenarios FROM scenarios;
+SELECT count(*) as dict_items FROM dict_items WHERE dict_id=(SELECT id FROM data_dicts WHERE dict_code='case_category');

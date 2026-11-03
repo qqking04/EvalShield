@@ -1,0 +1,6 @@
+﻿to,from,allowed,expected_code
+IN_PROGRESS,NEW,True,0
+SETTLED,IN_PROGRESS,True,0
+CLOSED,IN_PROGRESS,False,400
+CLOSED,SETTLED,True,0
+SETTLED,NEW,False,400

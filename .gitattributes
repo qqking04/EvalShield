@@ -1,0 +1,4 @@
+# CI 钩子必须保持 LF（bash 遇 CRLF 报 bad interpreter）
+scripts/ci/post-receive text eol=lf
+scripts/ci/pre-receive text eol=lf
+scripts/ci/pre-commit text eol=lf

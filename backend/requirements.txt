@@ -1,0 +1,26 @@
+# EvalShield 后端依赖（Python 3.13, PostgreSQL 16）
+# 安装方式（建议单独虚拟环境）:
+#   python -m venv .venv && .venv/Scripts/python.exe -m pip install -r requirements.txt
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+sqlalchemy==2.0.36
+psycopg2-binary==2.9.10
+pydantic==2.10.4
+python-jose[cryptography]==3.3.0
+passlib==1.7.4
+bcrypt==4.0.1
+python-multipart==0.0.20
+pyotp==2.9.0
+email-validator==2.2.0
+httpx==0.28.1
+openai==1.58.1
+playwright==1.63.0
+redis==5.0.8
+reportlab==5.0.1
+cryptography==43.0.3
+python-docx==1.1.2
+pypdf==5.4.0
+
+# 真实测试工具链（与 docker-compose.yml 挂载的系统工具配合，实现真实执行而非模拟）
+locust>=2.32                  # 性能测试主引擎（MIT），替代 httpx 降级模式；D-07 放宽钉死（实装 2.46.7）
+great_expectations==1.23.1     # 数据质量引擎（Apache-2.0），新增 DATA_QUALITY 引擎依赖

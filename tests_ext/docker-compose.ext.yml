@@ -1,0 +1,48 @@
+# ES8-BUG-013 外部联调环境（不进主 CI）
+# 独立 compose：Keycloak（mock IdP，SSO 真实 OIDC 联调）+ EvalShield 栈。
+# 支付宝沙箱走环境变量注入（见 env.sandbox.example），真实密钥严禁入仓。
+# 用法（需 docker）：
+#   docker compose -f docker-compose.ext.yml --env-file env.sandbox.example up -d
+#   python -m pytest . -m ext -q          # 通过前 M2-E*/M10-E* 不进入对外报价（销售 SOP）
+name: evalshield-ext
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: ${KC_ADMIN_PASSWORD:?set in env file}
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./realm/evalshield-realm.json:/opt/keycloak/data/import/evalshield-realm.json:ro
+
+  evalshield:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://evalshield:evalshield@db:5432/evalshield
+      EDITION: saas
+      SSO_MODE: oidc
+      OIDC_ISSUER: http://keycloak:8080/realms/evalshield
+      ALIPAY_SANDBOX_GATEWAY: ${ALIPAY_SANDBOX_GATEWAY:-}
+      ALIPAY_SANDBOX_APP_ID: ${ALIPAY_SANDBOX_APP_ID:-}
+      ALIPAY_SANDBOX_PRIVATE_KEY_FILE: /run/secrets/alipay_pk
+      ALIPAY_SANDBOX_PUBLIC_KEY: ${ALIPAY_SANDBOX_PUBLIC_KEY:-}
+    ports:
+      - "8000:8000"
+    depends_on:
+      - keycloak
+      - db
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: evalshield
+      POSTGRES_PASSWORD: evalshield
+      POSTGRES_DB: evalshield
+      TZ: UTC
+    volumes:
+      - ../database:/initdb:ro

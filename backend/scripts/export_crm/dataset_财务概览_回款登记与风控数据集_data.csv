@@ -1,0 +1,4 @@
+﻿case,amount,invoice_date,days_outstanding,expect_risk_alert
+AJ-20260930-0001,50000,2026-08-01,60,True
+AJ-20260930-0002,120000,2026-09-15,15,False
+AJ-20260930-0003,80000,2026-07-01,90,True

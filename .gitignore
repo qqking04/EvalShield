@@ -1,0 +1,94 @@
+# ---- 临时/工作目录 ----
+.tmp/
+_frontend_build/
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+
+# ---- Node / 前端 ----
+node_modules/
+frontend/dist/
+dist/
+*.local
+
+# ---- 环境与密钥 ----
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.lic
+.keys/
+private/
+certs/private/
+secrets/
+license-keys-backup.enc
+
+# ---- 日志 ----
+*.log
+logs/
+
+# ---- IDE / 操作系统 ----
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ---- 工作区工具目录 ----
+.trae/
+.dumate/
+
+# ---- 运行产物 / 杂项 ----
+*.pid
+*.err
+*.out
+tmp_login.json
+_rtm_*.json
+_patch_*.py
+strict_scan.py
+test_backend.ps1
+test_results*.csv
+
+# ---- 大型二进制 / 运行时数据（不入库）----
+deploy/ms-playwright/
+backend/data/discover_shots/
+backend/data/evidence/
+backend/data/reports/
+backend/data/src/
+
+# ---- 工程卫生（产品优化3 U9）----
+_plan_t/
+tests/_ui_shots/
+backend/.coverage
+_audit_schema_u3.py
+
+# ---- 签发/验签层治理口径（优化14 §5.5.3-3）----
+# 1) backend/app/enterprise/license.py 与 scripts/issue_license.py 有意入仓：
+#    契约回归网（tests/test_es9_license_issue.py + CI FRZ-04）依赖其可测性；
+#    公钥非秘密，签发脚本无私钥（--key 指向仓外 PEM）即无签发能力。
+# 2) 秘密只有私钥：*.pem / *.key / *.lic / .keys/ / license-keys-backup.enc
+#    见上方 L22-32 忽略区 + CI KEY-01 必拦兜底。
+# 3) OSS 发布面排除由构建脚本物理剔除（F1 版本隔离），不由 .gitignore 承担。
+
+# ---- 仓库清理（A 类跟踪清出 2026-10-18，见 仓库清理与开源发布方案.md §1）----
+backend/scripts/export_crm/dataset_*.csv
+verification/garak-runs/
+
+# ---- 运行产物/IDE 交付物（ES11 收尾盘点 2026-10-28）----
+backend/data/attachments/
+backend/cov_report.txt
+.trae-html-share-packages/
+work/
+
+# ---- 优化12 运行期临时产物（2026-10-31）----
+.tmp_walkthrough/
+docs/verification/
+*.yaml.lock
+

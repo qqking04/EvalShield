@@ -1,0 +1,11 @@
+# Grafana datasource provisioning（compose monitoring profile 挂载）
+apiVersion: 1
+
+datasources:
+  - name: EvalShield-Prometheus
+    uid: evalshield-prom
+    type: prometheus
+    access: proxy
+    url: http://evalshield-prometheus:9090
+    isDefault: true
+    editable: false

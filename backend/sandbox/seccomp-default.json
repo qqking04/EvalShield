@@ -1,0 +1,9 @@
+{
+  "defaultAction": "SCMP_ACT_ALLOW",
+  "syscalls": [
+    {
+      "names": ["mount", "umount2", "pivot_root", "swapon", "swapoff", "reboot", "kexec_load", "open_by_handle_at"],
+      "action": "SCMP_ACT_ERRNO"
+    }
+  ]
+}

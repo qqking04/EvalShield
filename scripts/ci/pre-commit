@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# EvalShield 本地提交闸门（第 0 层）：密钥哨兵 + 商业目录闸门 + 优化12 §11.4 机制硬化
+# 部署：.\install-hooks.ps1 -Local（拷入 .git/hooks/pre-commit）
+# 受控逃生门：EVALSHIELD_SKIP_PRECOMMIT=1 git commit ...（例外须自行在提交信息注明原因）
+set -u
+[ "${EVALSHIELD_SKIP_PRECOMMIT:-}" = "1" ] && exit 0
+cd "$(git rev-parse --show-toplevel)" || exit 1
+fail=0
+
+# ---- 闸门 1：密钥哨兵（staged 内容与新增文件路径） ----
+# 只扫新增侧（+ 行，剔除 +++ 文件头）：删除行携带历史密钥值正是脱敏修复本体，
+# 全 diff 扫描会让「去掉泄露值的提交」自带泄露值而永久自阻塞（ES7-M-8）。
+STAGED=$(git diff --cached -U0 --diff-filter=ACM | grep -E '^\+[^+]|^\+$' | grep -nE "sk-[a-f0-9]{32}|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY" || true)
+if [ -n "$STAGED" ]; then
+  echo "FAIL(secret): 暂存内容疑似含密钥/私钥，commit 被拒："
+  printf '%s\n' "$STAGED" | head -5
+  fail=1
+fi
+NEWFILES=$(git diff --cached --name-only --diff-filter=A | grep -E '(\.lic|\.pem)$|(^|/)\.keys/' || true)
+if [ -n "$NEWFILES" ]; then
+  echo "FAIL(secret): 禁止将 license/私钥文件加入 git（.lic 走线下交付、私钥离线保管）："
+  printf '%s\n' "$NEWFILES" | head -5
+  fail=1
+fi
+
+# ---- 闸门 2：商业目录闸门（含 commercial 字样的新文件必须落在白名单目录） ----
+ALLOW='^(backend/app/commercial/|frontend/src/pages/commercial/|backend/tests/test_version_isolation|docs/|scripts/|\.tmp/)'
+BAD=$(git diff --cached --name-only --diff-filter=A | grep -i 'commercial' | grep -Ev "$ALLOW" || true)
+if [ -n "$BAD" ]; then
+  echo "FAIL(commercial-dir): commercial 文件不在白名单目录，commit 被拒（放 backend/app/commercial/ 或 frontend/src/pages/commercial/，或改走配置位）："
+  printf '%s\n' "$BAD" | head -5
+  fail=1
+fi
+
+# ---- 闸门 3：优化12 §11.4/T9 机制硬化（inti.sql 只追加、yaml 形状、三 lint、锁 1/2/3）----
+# 判据逻辑全部在 backend/scripts/pre_commit_checks.py（Python，跨平台、pytest 可测）；
+# 细粒度逃生门见该脚本 docstring（INTI_GATE_SKIP / FREEZE_EXEMPT）。
+if command -v python >/dev/null 2>&1; then
+  python backend/scripts/pre_commit_checks.py || fail=1
+else
+  echo "WARN(gate3): 未找到 python，机制硬化闸门跳过（CI 面 FRZ/lint 仍兜底）"
+fi
+
+[ "$fail" -ne 0 ] && { echo "pre-commit: 违规即止，勿用 --no-verify 绕过（CI 面仍会拦截）"; exit 1; }
+exit 0

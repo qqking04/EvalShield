@@ -1,0 +1,68 @@
+# FRZ-03：SCOPE FREEZE 机器可读单源（对应 doc/优化9测试方案.md §14 / BUG-ES9-010）
+# 本文件是 AGENTS.md「SCOPE FREEZE」表格的可执行投影。
+# 一致性校验：scripts/ci/check_scope_freeze.py（FRZ-03 门禁）。
+# 修改本文件必须同步修改 AGENTS.md 表格，否则门禁失败。
+version: 1
+source_of_truth: AGENTS.md
+
+decisions:
+  - id: ES9-P-28
+    scope: 国际化 / 英文界面 / 出海
+    decision: 本轮及 S1–S2 全周期不做
+    thaw_condition: 战略级书面决策
+  - id: ES9-P-29
+    scope: 新增测试引擎 / 新模块
+    decision: 冻结 6 个月（自 2026-10 起）
+    thaw_condition: 解冻工单号 + commit 标记
+  - id: ES9-P-30
+    scope: 在线支付 / SaaS 自助付费
+    decision: 推迟至 S3；本轮客户走对公合同 + 离线 License（scripts/issue_license.py）
+    thaw_condition: S3 里程碑评审
+  - id: ES9-P-31
+    scope: SaaS 托管运营能力（多区、容灾、计费闭环）
+    decision: 推迟；先具备“能长期跑”（W5）再谈“托管”
+    thaw_condition: W5 全量交付后评审
+
+# FRZ-02：依赖黑名单单源（此前分散在 AGENTS.md 锁2/锁3 与各脚本内联字面量）。
+# 校验脚本：scripts/ci/check_dependency_blacklist.py
+# 该脚本读取本段扫描依赖事实源，并断言黑名单字面量不内联出现在其他门禁脚本中。
+dependency_blacklist:
+  # 锁 2 —— i18n 依赖封禁（ES9-P-28）：前端依赖事实源
+  frontend_packages:
+    - react-i18next
+    - i18next
+    - vue-i18n
+    - "@formatjs/intl"
+    - "@formatjs/icu-messageformat-parser"
+  # 锁 3 —— 在线支付 SDK 封禁（ES9-P-30）：后端依赖事实源
+  # 说明：app/commercial/services/payments/ 下 alipay/wechat 适配层为预置骨架 + mock，
+  # 不属于本锁范围；锁禁止的是真实支付 SDK 进入运行环境依赖。
+  backend_packages:
+    - alipay-sdk-python
+    - wechatpayv3
+    - stripe
+  # 扫描目标（相对仓库根）；*optional 表示文件不存在时跳过
+  scan_targets:
+    - path: frontend/package.json
+      kind: npm
+    - path: frontend/pnpm-lock.yaml
+      kind: lockfile
+      optional: true
+    - path: backend/requirements.txt
+      kind: requirements
+    - path: backend/pyproject.toml
+      kind: toml
+      optional: true
+    - path: backend/uv.lock
+      kind: lockfile
+      optional: true
+
+# 锁 1 —— 引擎目录冻结（ES9-P-29）：静态约束定义，供 check_engine_freeze.sh 读取。
+engine_freeze:
+  directory: backend/app/engines/
+  exempt_marker: "freeze-exempt:"
+  # D-19：registry.py 登记表区域名（登记行变更同样受锁 1 约束）
+  registry_file: backend/app/engines/registry.py
+  registry_regions:
+    - _COMMUNITY_MODULES
+    - _COMMERCIAL_MODULES

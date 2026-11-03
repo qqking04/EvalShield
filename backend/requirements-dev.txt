@@ -1,0 +1,10 @@
+# EvalShield 测试工具链（CI stage1/tz/freeze 与 requirements.txt 并装；
+# 运行环境不装本文件——生产依赖事实源仍是 requirements.txt）
+pytest>=8.0
+pytest-cov>=5.0
+pyyaml>=6.0   # scripts/ci/check_blacklist_single_source.py 解析 scope-freeze.yaml
+# 优化12 T9（CI run#7 修复）：mechanism-lints job 只装本文件，但 SYNC-01
+# （sync_inti_sql.py model_tables）与 pre_commit C4 需 import app.models →
+# ORM-only 依赖（版本与 requirements.txt 同步，勿漂移）。
+sqlalchemy==2.0.36
+psycopg2-binary==2.9.10   # database.py 模块级 create_engine 解析方言即需 DBAPI

@@ -1,0 +1,194 @@
+/*
+ * EvalShield
+ * Copyright (c) 2025 武汉XX数字科技有限公司 (Wuhan XX Digital Technology Co., Ltd.). All rights reserved.
+ * Use of this source code is governed by the Business Source License 1.1
+ * (the "License") stated in the LICENSE file at the root of this
+ * distribution. Change Date: 3 years after release.
+ * Change License: Apache License, Version 2.0.
+ * SPDX-License-Identifier: BUSL-1.1
+ */
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: #0a0d12;
+  font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: #e6ebf0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.mono {
+  font-family: "JetBrains Mono", Consolas, "Courier New", monospace;
+}
+
+.mono-no {
+  font-family: "JetBrains Mono", Consolas, "Courier New", monospace;
+  font-size: 12px;
+  color: #8b97a7;
+}
+
+.page-card {
+  margin-bottom: 16px;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.stat-title {
+  color: #8b97a7;
+  font-size: 13px;
+}
+
+.stat-value {
+  font-size: 26px;
+  font-weight: 600;
+  color: #13c2c2;
+}
+
+.login-bg {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0a0d12 0%, #141923 50%, #13c2c2 100%);
+}
+
+/* 淡入上移动画（stagger） */
+.fadeUp {
+  animation: fadeUp .3s ease forwards;
+  opacity: 0;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* 免登录页面背景：暗色 + 右上角 45° 主色 3% 透明对角纹理 */
+.auth-bg {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    linear-gradient(135deg, #0b0f14 0%, #11161d 100%),
+    repeating-linear-gradient(
+      135deg,
+      rgba(19,194,194,0.03) 0px,
+      rgba(19,194,194,0.03) 1px,
+      transparent 1px,
+      transparent 14px
+    );
+  background-blend-mode: normal;
+}
+
+/* 免登录单卡 */
+.auth-card {
+  width: 440px;
+  max-width: 92vw;
+  background: #11161d;
+  border: 1px solid #1f2833;
+  border-radius: 4px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+  padding: 36px 36px 28px;
+}
+
+.auth-card .auth-title {
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0 0 6px;
+  color: #e6f7ff;
+  border-left: 3px solid #13c2c2;
+  padding-left: 12px;
+}
+.auth-card .auth-sub {
+  color: #8ba3b5;
+  font-size: 13px;
+  margin-bottom: 24px;
+  padding-left: 15px;
+}
+
+/* 密码策略条（4 段式） */
+.policy-bar {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+}
+.policy-bar .seg {
+  flex: 1;
+  height: 3px;
+  background: #2a3444;
+  border-radius: 1px;
+  transition: background .2s;
+}
+.policy-bar .seg.on { background: #13c2c2; }
+
+.policy-tips {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #8ba3b5;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 12px;
+}
+.policy-tips .on { color: #13c2c2; }
+
+/* 图2修复：父 submenu 因含选中叶子被 antd 标记 submenu-selected，
+   其标题文字色取 darkItemSelectedColor(#0b0f14) 与普通项(白色)不一致。
+   统一父目录标题为常规文字色，青色高亮仅保留给选中叶子项。 */
+.ant-menu-dark .ant-menu-submenu-selected > .ant-menu-submenu-title {
+  color: rgba(255, 255, 255, 0.65);
+}
+.ant-menu-dark .ant-menu-submenu-selected > .ant-menu-submenu-title:hover {
+  color: #fff;
+}
+
+/* 主标题左主色竖条 */
+.title-bar {
+  border-left: 3px solid #13c2c2;
+  padding-left: 10px;
+}
+
+/* 组织切换下拉 */
+.org-switcher {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border: 1px solid #1f2833;
+  border-radius: 2px;
+  cursor: pointer;
+  background: #161d26;
+  min-width: 220px;
+}
+.org-switcher .active-mark {
+  width: 3px;
+  height: 20px;
+  background: #13c2c2;
+  border-radius: 1px;
+}
+
+/* 分享页独立顶栏 */
+.share-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  height: 56px;
+  background: #11161d;
+  border-bottom: 1px solid #1f2833;
+}
+
+/* KV 编辑器 */
+.kv-editor table { width: 100%; }
+.kv-editor table input { width: 100%; background: #11161d; border: 1px solid #1f2833; color: #e6f7ff; padding: 4px 8px; border-radius: 2px; }

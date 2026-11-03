@@ -1,0 +1,14 @@
+# gitleaks 白名单（CI G2 门禁）：仓库内出现的下列值均为公开的占位/测试凭据，
+# 非真实密钥。新增条目必须同时说明用途，禁止用通配整段路径来"消音"。
+title = "EvalShield gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "CI 占位口令与本地测试账号（非秘密）"
+regexes = [
+  '''EvalShield@123''',          # 开发/CI 引导账号 admin 口令（ci-bootstrap.sql 建户）
+  '''ci-only-(webhook-)?not-secret''',  # ci.yml SECRET_KEY/WEBHOOK_SECRET 占位值
+  '''(?i)(POSTGRES_PASSWORD|DB_PASSWORD)\s*[:=]\s*"?EvalShield"?''',  # CI service 容器口令
+]

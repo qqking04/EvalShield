@@ -1,0 +1,23 @@
+# ES9-P-14：Prometheus 抓取配置（compose monitoring profile 挂载点）
+# backend /metrics 需 METRICS_ENABLED=true；配置 METRICS_TOKEN 时启用 Bearer 校验。
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: evalshield-backend
+    metrics_path: /metrics
+    # 令牌填写：Prometheus 不展开环境变量——backend 设置了 METRICS_TOKEN 时，
+    # 将下方 credentials 替换为同一强随机值（或部署脚本 sed 注入）。
+    # backend 未设 METRICS_TOKEN 时 /metrics 对内网开放，保持空串即可。
+    authorization:
+      type: Bearer
+      credentials: ""
+    static_configs:
+      - targets: ["evalshield-backend:8000"]
+        labels:
+          service: evalshield-backend
+
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]

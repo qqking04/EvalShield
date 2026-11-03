@@ -1,0 +1,9 @@
+{
+  "realm": "evalshield",
+  "enabled": true,
+  "clientId": "evalshield-web",
+  "protocol": "openid-connect",
+  "publicClient": false,
+  "standardFlowEnabled": true,
+  "_comment": "ES8-BUG-013 Keycloak 测试 realm 骨架：接通联调时按 backend/app/routers/sso.py 的 OIDC 发现路径与 PKCE 要求补全 client/role mapper（本地机密与真实 IdP 参数严禁入仓）。"
+}

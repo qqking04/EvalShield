@@ -1,0 +1,239 @@
+{
+  "_comment": "内容日历：每天按 (当年第几天 % topics 数) 选一条，再用 (周序号 % titles 数) 选标题变体；生成器还会把最近已用标题喂给模型要求避开，保证天天不同。可自行增删条目。",
+  "topics": [
+    {
+      "id": "position-compliance",
+      "theme": "赛道定位",
+      "angle": "为什么国内缺一个面向备案的『合规交付型』大模型评测平台，而不是再多一个开发者工具",
+      "titles": [
+        "跑完一次大模型备案自测我才明白：市面上那些评测工具，帮不了你交差",
+        "Garak、Promptfoo 很好，但它们不会替你写那份给客户签字的报告",
+        "大模型要上线，评测到底该买『工具』还是『能交付证据链的平台』"
+      ],
+      "evidence": ["positioning.what_we_are", "project.governance", "project.chinese_compliance", "market_refs.eval", "market_refs.standards"],
+      "reader": "要把模型投用户/写进产品、面临合规或客户交代的负责人",
+      "hook": 0
+    },
+    {
+      "id": "reproducible-judge",
+      "theme": "可复现性与裁判治理",
+      "angle": "LLM-as-judge 结果怎么做到能被审计、能被复现、敢给客户签字",
+      "titles": [
+        "让 LLM 裁判不再『玄学』：prompt 固化、双采样一致性和一个 Kappa 告警线",
+        "同样的越狱样本，为什么今天判过、明天判不过——我们怎么锁住裁判的不确定性",
+        "评测结果可复现，靠的不是运气，是 seed、temperature=0 和 prompt 的 sha256"
+      ],
+      "evidence": ["project.governance", "positioning.moat", "market_refs.eval(Inspect AI)", "positioning.honest_limits"],
+      "reader": "被『裁判模型不稳定』折磨过的算法/测试工程师",
+      "hook": 2
+    },
+    {
+      "id": "vs-garak",
+      "theme": "技术横评",
+      "angle": "EvalShield 与 Garak/PyRIT/DeepTeam 在攻击覆盖上的诚实差距",
+      "titles": [
+        "把我们的红队引擎和 Garak 摆一起：说清楚我们强在哪、差多少",
+        "自研红队评测的坦白局：内置 15 条模板对阵别人几百个探针，我们不吹",
+        "越狱评测：自动对抗迭代攻击，我们暂时还没做，原因写在正文"
+      ],
+      "evidence": ["project.engines", "project.attack_mutation", "project.verified_numbers.redteam_builtin_templates", "market_refs.red_team", "positioning.honest_limits"],
+      "reader": "做安全评测、想看真实对比的技术人",
+      "hook": 3
+    },
+    {
+      "id": "hallucination-method",
+      "theme": "引擎拆解",
+      "angle": "幻觉检测为什么用『语义相似+事实锚点』而不是直接上 NLI，以及这么做的代价",
+      "titles": [
+        "大模型幻觉检测，我们用 0.85 语义 + 0.15 数字锚点，为什么不是纯 NLI",
+        "一句『差不多对』的回答怎么抓：幻觉引擎里的 embedding 与事实锚点",
+        "幻觉评测最难的不是算法，是没有标准答案时怎么判分"
+      ],
+      "evidence": ["project.engines.ai_eval_engines", "project.verified_numbers.hallucination_weights", "market_refs.eval(RAGAS)", "positioning.honest_limits"],
+      "reader": "关注生成质量评测的工程师/产品",
+      "hook": 0
+    },
+    {
+      "id": "chinese-regulation",
+      "theme": "中文合规",
+      "angle": "国际工具测不了中国法规：条款级合规判定与法规版本化怎么做",
+      "titles": [
+        "国外评测工具跑不出『广告法』违规——中文法规条款级判定实录",
+        "法规会变、会分版本、有生效日期：我们怎么把合规判定做成可追溯",
+        "生成式 AI 服务管理办法落地评测：把法条拆成模型能判的条款"
+      ],
+      "evidence": ["project.chinese_compliance", "project.governance", "market_refs.standards", "positioning.moat"],
+      "reader": "负责合规/法务对接的技术与业务",
+      "hook": 1
+    },
+    {
+      "id": "pii-detection",
+      "theme": "引擎拆解",
+      "angle": "PII 泄露检测为什么 22 类正则 + Luhn + 上下文佐证比纯大模型判更稳",
+      "titles": [
+        "PII 检测别全指望大模型：正则、Luhn 校验和上下文窗口反而更靠谱",
+        "让被测模型复述一遍已知 PII，就能测出它会不会泄露——5 条探针的思路",
+        "脱敏展示、变形 PII 扫描：隐私泄露评测里那些不起眼的工程活"
+      ],
+      "evidence": ["project.engines.ai_eval_engines", "project.verified_numbers.pii_categories", "positioning.honest_limits"],
+      "reader": "做数据安全/隐私合规的工程师",
+      "hook": 3
+    },
+    {
+      "id": "prompt-injection",
+      "theme": "引擎拆解",
+      "angle": "提示注入检测的三层加权（规则+语义+行为验证）与一个诚实的坑",
+      "titles": [
+        "提示注入怎么判：规则 0.4 + 语义 0.35 + 行为 0.25，以及我们还没填的坑",
+        "『忽略以上指令』只是最笨的注入：讲讲注入检测里的分隔符与编码特征",
+        "注入评测里，真打目标和用裁判模型模拟，是两码事"
+      ],
+      "evidence": ["project.engines.ai_eval_engines", "market_refs.standards(OWASP LLM Top 10)", "positioning.honest_limits"],
+      "reader": "关注 LLM 应用安全的开发",
+      "hook": 2
+    },
+    {
+      "id": "edition-isolation",
+      "theme": "工程架构",
+      "angle": "一个代码库怎么同时发社区版和商业版：物理隔离 + 档位矩阵 + 离线 License",
+      "titles": [
+        "开源版和商业版同一套代码：我们怎么用『物理缺席』做版本隔离",
+        "30 秒讲清：社区 12 引擎、商业 16 引擎，OSS 树里商业目录压根不存在",
+        "RSA 离线签发 + 机器指纹绑定：私有化软件防拷贝的朴素做法"
+      ],
+      "evidence": ["project.edition_isolation", "project.license", "project.engines"],
+      "reader": "做开源商业化/私有化交付的架构师",
+      "hook": 1
+    },
+    {
+      "id": "rag-metrics",
+      "theme": "引擎拆解",
+      "angle": "自研 RAG 三指标（faithfulness/relevance/recall）与 RAGAS 的取舍",
+      "titles": [
+        "不直接搬 RAGAS：我们把 faithfulness、相关性、召回率自己实现一边",
+        "RAG 评测的合并分为什么取『加权 + 最差项』，而不是简单平均",
+        "裁判模型也要花 token：RAG 批量评测里的并发、成本与 self-consistency"
+      ],
+      "evidence": ["project.engines.ai_eval_engines", "market_refs.eval(RAGAS)", "positioning.honest_limits"],
+      "reader": "搭 RAG、要量化检索问答质量的人",
+      "hook": 0
+    },
+    {
+      "id": "human-review-loop",
+      "theme": "可复现性与裁判治理",
+      "angle": "人工复核怎么反哺机器：approve 关键词回流规则库的设计",
+      "titles": [
+        "评测里的人工复核不是走形式：被判错的样本，怎么回流成新的检测规则",
+        "把 P0/P1/P2 复核队列做成规则库的『训练场』",
+        "机判会累、会漂：我们怎么用双采样抽检兜住裁判质量"
+      ],
+      "evidence": ["project.governance", "positioning.moat", "market_refs.eval(Inspect AI)"],
+      "reader": "设计标注/审核流程的团队",
+      "hook": 1
+    },
+    {
+      "id": "why-not-just-deepeval",
+      "theme": "技术横评",
+      "angle": "已经有 DeepEval/Promptfoo 了，为什么还要做平台——诚实回答『重复造轮子』质疑",
+      "titles": [
+        "有了 DeepEval 和 Promptfoo，为什么还自研评测引擎——一个不讨喜的回答",
+        "『直接用开源不就好了』：把这句话拆成合规、可复现、交付三层来回应",
+        "开源评测库解决的是跑分，我们解决的是一套要给人看、要能签字的东西"
+      ],
+      "evidence": ["positioning.what_we_are", "market_refs.eval", "market_refs.red_team", "project.governance"],
+      "reader": "技术选型决策者",
+      "hook": 2
+    },
+    {
+      "id": "jailbreak-eval",
+      "theme": "引擎拆解",
+      "angle": "越狱检测的三分类（BYPASSED/ATTEMPTED/SAFE）和样本从哪来",
+      "titles": [
+        "越狱成功没成功，不是二选一：BYPASSED / ATTEMPTED / SAFE 三态判定",
+        "越狱样本从哪来：不写死在代码里，而是种子库 + 已审批变异样本",
+        "关键词判『拒绝』很容易被绕：一句『我不能确定但步骤如下』就是反例"
+      ],
+      "evidence": ["project.engines.ai_eval_engines", "project.attack_mutation", "positioning.honest_limits"],
+      "reader": "做对齐/安全评测的人",
+      "hook": 3
+    },
+    {
+      "id": "offline-delivery",
+      "theme": "赛道定位",
+      "angle": "私有化离线部署为什么是国产评测平台绕不开的一课",
+      "titles": [
+        "客户说『数据不能出内网』：评测平台怎么做到完全离线私有化",
+        "docker.sock、默认口令、密钥泄露——上线前自查的几件要命事",
+        "能长期跑 比 功能炫 更重要：一套面向交付的运维底线"
+      ],
+      "evidence": ["positioning.moat", "project.license", "project.edition_isolation"],
+      "reader": "To B 交付/运维",
+      "hook": 0
+    },
+    {
+      "id": "metrics-standardization",
+      "theme": "自省与路线图",
+      "angle": "自研指标最大的软肋：分数不可与业界对齐，我们打算怎么补",
+      "titles": [
+        "自研评测指标最尴尬的地方：你的 0.82 和别人的 0.82 不是一回事",
+        "从『能跑』到『可比』：把幻觉/RAG 指标对齐标准实现的路线图",
+        "坦诚一个缺陷：多裁判投票和 Kappa 校准，我们建好了还没接进引擎"
+      ],
+      "evidence": ["positioning.honest_limits", "market_refs.eval(RAGAS)", "market_refs.eval(DeepEval)", "project.governance"],
+      "reader": "较真的评测研究者",
+      "hook": 2
+    },
+    {
+      "id": "ethics-engine",
+      "theme": "引擎拆解",
+      "angle": "伦理合规评测：动态法规库 + 逐条款 LLM 判定 + 关键词兜底",
+      "titles": [
+        "伦理评测不是打个『安全分』：把违禁内容拆到条款级别怎么判",
+        "没有裁判模型时怎么办：伦理引擎里 10 个关键词兜底的取舍",
+        "合规分怎么算：加权违规扣减与上限，一个可解释的公式"
+      ],
+      "evidence": ["project.engines.ai_eval_engines", "project.chinese_compliance", "positioning.honest_limits"],
+      "reader": "内容安全/风控",
+      "hook": 1
+    },
+    {
+      "id": "report-evidence",
+      "theme": "可复现性与裁判治理",
+      "angle": "一份能被客户审计的评测报告长什么样：run_snapshot 与审计轨迹",
+      "titles": [
+        "客户要审计你的评测结论：报告里得有什么，才经得起回看",
+        "可复现评测的最小闭环：run_snapshot + 裁判固化 + 交付四件套",
+        "从一次跑题到一份签字报告，中间那些没被讲出来的工程"
+      ],
+      "evidence": ["project.governance", "positioning.moat", "project.engines"],
+      "reader": "交付/项目管理",
+      "hook": 1
+    },
+    {
+      "id": "multi-turn",
+      "theme": "引擎拆解",
+      "angle": "多轮一致性评测：会话状态机、数字锚点与矛盾判定",
+      "titles": [
+        "单轮答对没用：大模型在多轮对话里『前后矛盾』怎么测",
+        "多轮一致性评测，难的是维护一个会话状态机",
+        "让 LLM 扮演用户追问，比固定剧本更能逼出漂移"
+      ],
+      "evidence": ["project.engines.ai_eval_engines", "market_refs.eval(DeepEval)", "positioning.honest_limits"],
+      "reader": "做对话/Agent 质量的人",
+      "hook": 3
+    },
+    {
+      "id": "startup-reality",
+      "theme": "赛道定位",
+      "angle": "一个人也能维护的评测产品：工程取舍与『少做功能』的纪律",
+      "titles": [
+        "小团队做大模型评测：我们主动冻结了国际化、新引擎和在线支付",
+        "为什么我们不做 SaaS 托管，先把『能长期跑』这件事做到",
+        "把『不做』写进规则：用工程锁约束功能冲动"
+      ],
+      "evidence": ["positioning.what_we_are", "project.edition_isolation"],
+      "reader": "创业者/独立开发者",
+      "hook": 0
+    }
+  ]
+}

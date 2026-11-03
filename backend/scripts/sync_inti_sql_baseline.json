@@ -1,0 +1,799 @@
+{
+  "version": 1,
+  "note": "refresh-baseline 自动生成，须人工复核",
+  "exempt": {
+    "models->inti.sql|billing_plans": [
+      "is_public",
+      "price_monthly_cents",
+      "price_yearly_cents",
+      "trial_days"
+    ],
+    "models->inti.sql|billing_quotas": [
+      "period_end",
+      "period_start",
+      "sub_status"
+    ],
+    "models->inti.sql|billing_topups": [
+      "source"
+    ],
+    "models->inti.sql|community_usage_daily": [
+      "cnt",
+      "created_at",
+      "usage_date"
+    ],
+    "models->inti.sql|defect_sync_links": [
+      "defect_id",
+      "external_id",
+      "external_url",
+      "last_synced_at",
+      "sync_status"
+    ],
+    "models->inti.sql|defect_sync_targets": [
+      "enabled",
+      "name",
+      "issue_type",
+      "personal_token_enc",
+      "project_key",
+      "token_enc"
+    ],
+    "models->inti.sql|defects": [
+      "assignee_id",
+      "assignee_name",
+      "attachments",
+      "fix_suggestion",
+      "module",
+      "origin_id",
+      "origin_type",
+      "priority",
+      "reproduce_steps",
+      "requirement_id",
+      "severity_basis",
+      "target_version_id"
+    ],
+    "models->inti.sql|delivery_packages": [
+      "created_by",
+      "items",
+      "standards_ver",
+      "status",
+      "file_path",
+      "sha256",
+      "size"
+    ],
+    "models->inti.sql|discover_job_routes": [
+      "tenant_id"
+    ],
+    "models->inti.sql|discover_jobs": [
+      "auth_type",
+      "discover_mode",
+      "progress_pct",
+      "project_id",
+      "target_snapshot"
+    ],
+    "models->inti.sql|enterprise_licenses": "*",
+    "models->inti.sql|es8_tenant_migration_map": "*",
+    "models->inti.sql|es_tenant_backfill_map": "*",
+    "models->inti.sql|eval_run_items": [
+      "bank_id",
+      "category",
+      "evidence_payload",
+      "evidence_ref",
+      "final_verdict",
+      "judge_seed",
+      "judge_verdict",
+      "question_id",
+      "response_ref",
+      "review_status",
+      "reviewer_id",
+      "rule_verdict",
+      "seq",
+      "verdict_reason",
+      "completion_tokens"
+    ],
+    "models->inti.sql|eval_runs": [
+      "actual_cost",
+      "baseline_run_id",
+      "dataset_version",
+      "engine_code",
+      "estimated_cost",
+      "fact_source_id",
+      "parent_run_id",
+      "project_version_id",
+      "question_bank_id",
+      "run_purpose",
+      "run_snapshot"
+    ],
+    "models->inti.sql|eval_set_revisions": [
+      "content",
+      "created_at",
+      "created_by",
+      "diff_stats",
+      "version",
+      "removed",
+      "unchanged"
+    ],
+    "models->inti.sql|eval_sets": [
+      "module",
+      "parent_set_id",
+      "rel_case_ids",
+      "rel_dataset_ids",
+      "version"
+    ],
+    "models->inti.sql|fact_sources": [
+      "status"
+    ],
+    "models->inti.sql|global_refusal_rules": [
+      "created_by",
+      "enabled",
+      "source"
+    ],
+    "models->inti.sql|license_activations": "*",
+    "models->inti.sql|menus": [
+      "remark"
+    ],
+    "models->inti.sql|model_configs": [
+      "api_key_enc",
+      "seed"
+    ],
+    "models->inti.sql|monitor_alerts": [
+      "fired_at",
+      "metric",
+      "op",
+      "run_id",
+      "state",
+      "threshold"
+    ],
+    "models->inti.sql|monitors": [
+      "alert_conditions",
+      "baseline_metrics",
+      "baseline_mode",
+      "created_by",
+      "cron",
+      "last_checked_at",
+      "name",
+      "next_fire_at",
+      "notify_rule_event",
+      "org_id",
+      "op",
+      "threshold"
+    ],
+    "models->inti.sql|notify_channels": [
+      "created_by",
+      "enabled",
+      "kind",
+      "last_probe_ok",
+      "name"
+    ],
+    "models->inti.sql|notify_deliveries": [
+      "attempts",
+      "created_at",
+      "error",
+      "event",
+      "status"
+    ],
+    "models->inti.sql|notify_rules": [
+      "channel_ids",
+      "enabled",
+      "min_severity",
+      "scope",
+      "template_key",
+      "suite_id"
+    ],
+    "models->inti.sql|orders": [
+      "amount_cents",
+      "billing_cycle",
+      "created_at",
+      "credit_deduct_cents",
+      "discount_cents",
+      "order_no",
+      "paid_at",
+      "plan_code",
+      "provider",
+      "provider_order_id",
+      "status",
+      "subscription_id"
+    ],
+    "models->inti.sql|payments": [
+      "amount_cents",
+      "created_at",
+      "provider",
+      "raw_notify",
+      "status",
+      "trade_no"
+    ],
+    "models->inti.sql|pii_rules": [
+      "is_active"
+    ],
+    "models->inti.sql|project_members": [
+      "created_by"
+    ],
+    "models->inti.sql|question": [
+      "category",
+      "created_at",
+      "expected_answer",
+      "language",
+      "sensitivity",
+      "seq",
+      "split",
+      "sub_category",
+      "tags",
+      "text"
+    ],
+    "models->inti.sql|question_bank": [
+      "bank_version",
+      "created_by",
+      "is_builtin",
+      "status"
+    ],
+    "models->inti.sql|question_import_job": [
+      "created_by",
+      "file_path",
+      "status",
+      "total_rows",
+      "code",
+      "message"
+    ],
+    "models->inti.sql|reports": [
+      "acceptance",
+      "environment",
+      "parent_report_id",
+      "performance_metrics",
+      "report_subtype",
+      "risk_basis",
+      "risk_level"
+    ],
+    "models->inti.sql|retention_policies": [
+      "created_at",
+      "days"
+    ],
+    "models->inti.sql|review_items": [
+      "assignee_id",
+      "auto_confidence",
+      "auto_verdict",
+      "context",
+      "created_at",
+      "human_note",
+      "human_verdict",
+      "judge_model",
+      "judge_prompt_hash",
+      "priority",
+      "run_item_id",
+      "source",
+      "source_ref",
+      "status",
+      "item_index"
+    ],
+    "models->inti.sql|sandbox_executions": [
+      "worker_id"
+    ],
+    "models->inti.sql|sca_components": [
+      "cve_count",
+      "dependency_path",
+      "direct",
+      "license_name",
+      "name",
+      "tenant_id",
+      "version"
+    ],
+    "models->inti.sql|sca_vulnerabilities": [
+      "component_id",
+      "component_name",
+      "created_at",
+      "description",
+      "fixed_version",
+      "references",
+      "tenant_id"
+    ],
+    "models->inti.sql|scenarios": [
+      "module",
+      "source"
+    ],
+    "models->inti.sql|src_findings": [
+      "code_snippet",
+      "created_at",
+      "line_start",
+      "message",
+      "rule_name",
+      "rule_ref",
+      "tenant_id"
+    ],
+    "models->inti.sql|src_rules": [
+      "category",
+      "cwe_id",
+      "description",
+      "enabled",
+      "language",
+      "name",
+      "pattern",
+      "rule_type",
+      "tenant_id"
+    ],
+    "models->inti.sql|src_scan_tasks": [
+      "commit_hash",
+      "error_message",
+      "name",
+      "scan_backend",
+      "source_type",
+      "source_url",
+      "started_at",
+      "tenant_id",
+      "total_files",
+      "workdir"
+    ],
+    "models->inti.sql|subscriptions": [
+      "anonymize_after",
+      "billing_cycle",
+      "created_at",
+      "plan_code",
+      "status",
+      "trial_ends_at"
+    ],
+    "models->inti.sql|system_settings": [
+      "description"
+    ],
+    "models->inti.sql|target_registry": [
+      "auth_env",
+      "base_url",
+      "chat_path",
+      "headers",
+      "model",
+      "name",
+      "protocol",
+      "request_template",
+      "response_path",
+      "target_type",
+      "timeout_sec"
+    ],
+    "models->inti.sql|tenants": [
+      "contact_email",
+      "name",
+      "org_id",
+      "owner_user_id",
+      "plan_code",
+      "source",
+      "trial_ends_at"
+    ],
+    "models->inti.sql|test_cases": [
+      "performance_config",
+      "review_status"
+    ],
+    "models->inti.sql|test_engines": [
+      "fidelity"
+    ],
+    "models->inti.sql|test_tasks": [
+      "gate_result",
+      "gate_rules",
+      "project_version_id"
+    ],
+    "models->inti.sql|trace_policies": [
+      "created_at",
+      "daily_cap",
+      "judge_metrics",
+      "low_score_threshold",
+      "sample_rate"
+    ],
+    "models->inti.sql|traces": [
+      "created_at",
+      "eval_status",
+      "external_ref",
+      "latency_ms",
+      "model",
+      "occurred_at",
+      "project_id",
+      "request",
+      "response",
+      "reviewed",
+      "scores",
+      "session_id",
+      "source",
+      "status",
+      "target_id",
+      "tokens",
+      "trace_payload"
+    ],
+    "models->db|enterprise_licenses": "*",
+    "models->db|es8_tenant_migration_map": "*",
+    "models->db|es_tenant_backfill_map": "*",
+    "models->db|license_activations": "*",
+    "inti.sql->db|billing_plans": [
+      "is_public",
+      "price_monthly_cents",
+      "price_yearly_cents",
+      "trial_days"
+    ],
+    "inti.sql->db|billing_quotas": [
+      "period_end",
+      "period_start",
+      "sub_status"
+    ],
+    "inti.sql->db|billing_topups": [
+      "source"
+    ],
+    "inti.sql->db|community_usage_daily": [
+      "cnt",
+      "created_at",
+      "usage_date"
+    ],
+    "inti.sql->db|defect_sync_links": [
+      "defect_id",
+      "external_id",
+      "external_url",
+      "last_synced_at",
+      "sync_status"
+    ],
+    "inti.sql->db|defect_sync_targets": [
+      "issue_type",
+      "personal_token_enc",
+      "project_key",
+      "token_enc",
+      "enabled",
+      "name"
+    ],
+    "inti.sql->db|defects": [
+      "assignee_id",
+      "assignee_name",
+      "attachments",
+      "fix_suggestion",
+      "module",
+      "origin_id",
+      "origin_type",
+      "priority",
+      "reproduce_steps",
+      "requirement_id",
+      "severity_basis",
+      "target_version_id"
+    ],
+    "inti.sql->db|delivery_packages": [
+      "file_path",
+      "sha256",
+      "size",
+      "created_by",
+      "items",
+      "standards_ver",
+      "status"
+    ],
+    "inti.sql->db|discover_job_routes": [
+      "tenant_id"
+    ],
+    "inti.sql->db|discover_jobs": [
+      "auth_type",
+      "discover_mode",
+      "progress_pct",
+      "project_id",
+      "target_snapshot"
+    ],
+    "inti.sql->db|enterprise_licenses": [
+      "sso",
+      "edition",
+      "features",
+      "machine_fp",
+      "payload_json",
+      "status",
+      "tenant_id"
+    ],
+    "inti.sql->db|es8_tenant_migration_map": [
+      "migrated_at",
+      "tenant_id"
+    ],
+    "inti.sql->db|eval_run_items": [
+      "completion_tokens",
+      "bank_id",
+      "category",
+      "evidence_payload",
+      "evidence_ref",
+      "final_verdict",
+      "judge_seed",
+      "judge_verdict",
+      "question_id",
+      "response_ref",
+      "review_status",
+      "reviewer_id",
+      "rule_verdict",
+      "seq",
+      "verdict_reason"
+    ],
+    "inti.sql->db|eval_runs": [
+      "actual_cost",
+      "baseline_run_id",
+      "dataset_version",
+      "engine_code",
+      "estimated_cost",
+      "fact_source_id",
+      "parent_run_id",
+      "project_version_id",
+      "question_bank_id",
+      "run_purpose",
+      "run_snapshot"
+    ],
+    "inti.sql->db|eval_set_revisions": [
+      "removed",
+      "unchanged",
+      "content",
+      "created_at",
+      "created_by",
+      "diff_stats",
+      "version"
+    ],
+    "inti.sql->db|eval_sets": [
+      "module",
+      "parent_set_id",
+      "rel_case_ids",
+      "rel_dataset_ids",
+      "version"
+    ],
+    "inti.sql->db|fact_sources": [
+      "status"
+    ],
+    "inti.sql->db|global_refusal_rules": [
+      "created_by",
+      "enabled",
+      "source"
+    ],
+    "inti.sql->db|license_activations": [
+      "fail_reason",
+      "result"
+    ],
+    "inti.sql->db|menus": [
+      "remark"
+    ],
+    "inti.sql->db|model_configs": [
+      "api_key_enc",
+      "seed"
+    ],
+    "inti.sql->db|monitor_alerts": [
+      "fired_at",
+      "metric",
+      "op",
+      "run_id",
+      "state",
+      "threshold"
+    ],
+    "inti.sql->db|monitors": [
+      "op",
+      "threshold",
+      "alert_conditions",
+      "baseline_metrics",
+      "baseline_mode",
+      "created_by",
+      "cron",
+      "last_checked_at",
+      "name",
+      "next_fire_at",
+      "notify_rule_event",
+      "org_id"
+    ],
+    "inti.sql->db|notify_channels": [
+      "created_by",
+      "enabled",
+      "kind",
+      "last_probe_ok",
+      "name"
+    ],
+    "inti.sql->db|notify_deliveries": [
+      "attempts",
+      "created_at",
+      "error",
+      "event",
+      "status"
+    ],
+    "inti.sql->db|notify_rules": [
+      "suite_id",
+      "channel_ids",
+      "enabled",
+      "min_severity",
+      "scope",
+      "template_key"
+    ],
+    "inti.sql->db|orders": [
+      "amount_cents",
+      "billing_cycle",
+      "created_at",
+      "credit_deduct_cents",
+      "discount_cents",
+      "order_no",
+      "paid_at",
+      "plan_code",
+      "provider",
+      "provider_order_id",
+      "status",
+      "subscription_id"
+    ],
+    "inti.sql->db|payments": [
+      "amount_cents",
+      "created_at",
+      "provider",
+      "raw_notify",
+      "status",
+      "trade_no"
+    ],
+    "inti.sql->db|pii_rules": [
+      "is_active"
+    ],
+    "inti.sql->db|project_members": [
+      "created_by"
+    ],
+    "inti.sql->db|question": [
+      "category",
+      "created_at",
+      "expected_answer",
+      "language",
+      "sensitivity",
+      "seq",
+      "split",
+      "sub_category",
+      "tags",
+      "text"
+    ],
+    "inti.sql->db|question_bank": [
+      "bank_version",
+      "created_by",
+      "is_builtin",
+      "status"
+    ],
+    "inti.sql->db|question_import_job": [
+      "code",
+      "message",
+      "created_by",
+      "file_path",
+      "status",
+      "total_rows"
+    ],
+    "inti.sql->db|reports": [
+      "acceptance",
+      "environment",
+      "parent_report_id",
+      "performance_metrics",
+      "report_subtype",
+      "risk_basis",
+      "risk_level"
+    ],
+    "inti.sql->db|retention_policies": [
+      "created_at",
+      "days"
+    ],
+    "inti.sql->db|review_items": [
+      "item_index",
+      "assignee_id",
+      "auto_confidence",
+      "auto_verdict",
+      "context",
+      "created_at",
+      "human_note",
+      "human_verdict",
+      "judge_model",
+      "judge_prompt_hash",
+      "priority",
+      "run_item_id",
+      "source",
+      "source_ref",
+      "status"
+    ],
+    "inti.sql->db|sandbox_executions": [
+      "worker_id"
+    ],
+    "inti.sql->db|sca_components": [
+      "cve_count",
+      "dependency_path",
+      "direct",
+      "license_name",
+      "name",
+      "tenant_id",
+      "version"
+    ],
+    "inti.sql->db|sca_vulnerabilities": [
+      "component_id",
+      "component_name",
+      "created_at",
+      "description",
+      "fixed_version",
+      "references",
+      "tenant_id"
+    ],
+    "inti.sql->db|scenarios": [
+      "module",
+      "source"
+    ],
+    "inti.sql->db|src_findings": [
+      "code_snippet",
+      "created_at",
+      "line_start",
+      "message",
+      "rule_name",
+      "rule_ref",
+      "tenant_id"
+    ],
+    "inti.sql->db|src_rules": [
+      "category",
+      "cwe_id",
+      "description",
+      "enabled",
+      "language",
+      "name",
+      "pattern",
+      "rule_type",
+      "tenant_id"
+    ],
+    "inti.sql->db|src_scan_tasks": [
+      "commit_hash",
+      "error_message",
+      "name",
+      "scan_backend",
+      "source_type",
+      "source_url",
+      "started_at",
+      "tenant_id",
+      "total_files",
+      "workdir"
+    ],
+    "inti.sql->db|subscriptions": [
+      "anonymize_after",
+      "billing_cycle",
+      "created_at",
+      "plan_code",
+      "status",
+      "trial_ends_at"
+    ],
+    "inti.sql->db|system_settings": [
+      "description"
+    ],
+    "inti.sql->db|target_registry": [
+      "auth_env",
+      "base_url",
+      "chat_path",
+      "headers",
+      "model",
+      "name",
+      "protocol",
+      "request_template",
+      "response_path",
+      "target_type",
+      "timeout_sec"
+    ],
+    "inti.sql->db|tenants": [
+      "contact_email",
+      "name",
+      "org_id",
+      "owner_user_id",
+      "plan_code",
+      "source",
+      "trial_ends_at"
+    ],
+    "inti.sql->db|test_cases": [
+      "performance_config",
+      "review_status"
+    ],
+    "inti.sql->db|test_engines": [
+      "fidelity"
+    ],
+    "inti.sql->db|test_tasks": [
+      "gate_result",
+      "gate_rules",
+      "project_version_id"
+    ],
+    "inti.sql->db|trace_policies": [
+      "created_at",
+      "daily_cap",
+      "judge_metrics",
+      "low_score_threshold",
+      "sample_rate"
+    ],
+    "inti.sql->db|traces": [
+      "created_at",
+      "eval_status",
+      "external_ref",
+      "latency_ms",
+      "model",
+      "occurred_at",
+      "project_id",
+      "request",
+      "response",
+      "reviewed",
+      "scores",
+      "session_id",
+      "source",
+      "status",
+      "target_id",
+      "tokens",
+      "trace_payload"
+    ]
+  }
+}

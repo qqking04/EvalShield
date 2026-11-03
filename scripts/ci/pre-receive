@@ -1,0 +1,23 @@
+#!/bin/sh
+# ── 维护说明（入库版，与线上部署版同步）──────────────────────────
+# 部署：pwsh -File scripts/ci/install-hooks.ps1
+# 职责：OBS-3——拒绝非快进（force push）覆盖发布历史。仅管控 master 与 tags；
+#       删除引用（all-zeros）放行。违规 exit 1 即 git 端拒绝该 ref。
+# 日志：E:\setup package\evalshield-release.git\hooks\pre-receive.log
+LOG="/e/setup package/evalshield-release.git/hooks/pre-receive.log"
+ZERO="0000000000000000000000000000000000000000"
+
+DENY=0
+while read -r oldrev newrev refname; do
+  case "$refname" in
+    refs/heads/master|refs/tags/*) ;;
+    *) continue ;;
+  esac
+  [ "$oldrev" = "$ZERO" ] && continue
+  [ "$newrev" = "$ZERO" ] && continue
+  if ! git merge-base --is-ancestor "$oldrev" "$newrev" 2>/dev/null; then
+    echo "FAIL(non-fast-forward): ${refname} ${oldrev:0:7} -> ${newrev:0:7} 非快进，发布仓拒绝覆盖历史" | tee -a "$LOG" >&2
+    DENY=1
+  fi
+done
+exit "$DENY"

@@ -1,0 +1,13 @@
+# 后端构建上下文忽略（避免带入虚拟环境/数据/临时文件）
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+logs/
+.env
+*.log
+.pytest_cache/
+.mypy_cache/
+# 签发 CLI 仅签发者本机使用（声明"不进镜像"，此处强制排除）
+scripts/license_cli.py

@@ -1,0 +1,232 @@
+# EvalShield AI 系统测试服务平台 - 一键部署（PostgreSQL 16 + 后端 + 前端）
+# 用法：docker compose up -d --build
+# 信创/离线部署：./scripts/build-multiarch.sh → 拷 dist/images + deploy/ → ./scripts/deploy-offline.sh → ./scripts/self-check.sh
+# 目标架构：EVALSHIELD_PLATFORM=linux/amd64（默认）| linux/arm64（鲲鹏/飞腾），两个值可逗号分隔
+# 访问：http://localhost:8891 （前端）；后端 API http://localhost:8000/api/docs
+# 账号：admin / EvalShield@123
+# 端口绑定：默认仅监听宿主机回环（EVALSHIELD_BIND_HOST=127.0.0.1）；
+# 需局域网访问时显式置空：EVALSHIELD_BIND_HOST= docker compose up -d
+
+x-platform: &default-platform ${EVALSHIELD_PLATFORM:-linux/amd64}
+
+services:
+  db:
+    image: postgres:16-alpine
+    platform: *default-platform
+    container_name: evalshield-db
+    environment:
+      POSTGRES_DB: EvalShield
+      POSTGRES_USER: EvalShield
+      POSTGRES_PASSWORD: ${EVALSHIELD_DB_PASSWORD:-EvalShield}
+      # ES9-P-15：数据库统一 UTC 存储（展示层负责 Asia/Shanghai 换算）
+      TZ: UTC
+    volumes:
+      - evalshield_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U EvalShield -d EvalShield"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+    mem_limit: 256m
+    networks:
+      - evalshield-net
+
+  backend:
+    build: ./backend
+    platform: *default-platform
+    container_name: evalshield-backend
+    environment:
+      # 核心修复：强制 UTF-8 locale，否则 Python 字符串处理中文字符会丢失
+      # alpine 默认 POSIX locale 会让很多 Python 链路上的中文字串被降级为 ASCII
+      LANG: C.UTF-8
+      LANGUAGE: C.UTF-8
+      LC_ALL: C.UTF-8
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: EvalShield
+      DB_USER: EvalShield
+      DB_PASSWORD: ${EVALSHIELD_DB_PASSWORD:-EvalShield}
+      SECRET_KEY: ${EVALSHIELD_SECRET_KEY:?缺少密钥：cp deploy/.env.example .env 并填入 EVALSHIELD_SECRET_KEY（openssl rand -hex 32）}
+      SERVER_HOST: 0.0.0.0
+      SERVER_PORT: 8000
+      CORS_ORIGINS: ${EVALSHIELD_CORS_ORIGINS:-http://localhost:8080}
+      EVIDENCE_DIR: /app/data/evidence
+      REPORT_DIR: /app/data/reports
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+      JMETER_HOME: /jmeter/apache-jmeter-5.6.3
+      UI_DEFAULT_BASE_URL: http://evalshield-frontend
+      API_DEFAULT_BASE_URL: http://host.docker.internal:8000
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      # ES7-D-1：超管一次性口令透传（install-enterprise.sh 生成于 .env）——
+      # seed 走该分支时不打印口令，杜绝落 docker daemon 持久化日志
+      INIT_ADMIN_PASSWORD: ${INIT_ADMIN_PASSWORD:-}
+      # ES9-P-14：监控开关与 /metrics Bearer 令牌（.env 配置；默认关闭）
+      METRICS_ENABLED: ${METRICS_ENABLED:-false}
+      METRICS_TOKEN: ${METRICS_TOKEN:-}
+      NOTIFY_WEBHOOK_URL: ${NOTIFY_WEBHOOK_URL:-}
+      TZ: Asia/Shanghai
+    volumes:
+      - evalshield_reports:/app/data
+      # ES9-P-14：证据卷独立命名卷（备份脚本 tar 对象；水位探活目标）
+      - evalshield_evidence:/app/data/evidence
+      # Playwright Chromium 浏览器离线包（私有化部署，不再构建时从 Google CDN 下载）
+      # 首次部署前请先执行：docker cp evalshield-backend:/ms-playwright/ ./deploy/ms-playwright/
+      - ./deploy/ms-playwright:/ms-playwright:ro
+      # JMeter（真实性能压测工具链；宿主机工具目录由 JMETER_HOST_DIR 指定，
+      # 信创/离线以发布包内 deploy/jmeter 为准——缺目录时后端自动降级内置压测模式）
+      - ${JMETER_HOST_DIR:-./deploy/jmeter}:/jmeter:ro
+      # inti.sql 种子基线（test_engine_seed_v2 / check_inti_seed.py 静态断言只读引用）
+      - ./database:/database:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    # ES9-P-14：机器探活（免登录端点；503 即不健康）
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8000/api/healthz > /dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    ports:
+      - "${EVALSHIELD_BIND_HOST:-127.0.0.1}:${EVALSHIELD_BACKEND_PORT:-8000}:8000"
+    restart: unless-stopped
+    mem_limit: 512m
+    networks:
+      - evalshield-net
+    # 本地模型接入：让容器访问宿主机 Ollama（http://host.docker.internal:11434）实现本地 GPU 模型
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  frontend:
+    build: ./frontend
+    platform: *default-platform
+    container_name: evalshield-frontend
+    depends_on:
+      - backend
+    ports:
+      - "${EVALSHIELD_BIND_HOST:-127.0.0.1}:${EVALSHIELD_FRONTEND_PORT:-8891}:80"
+    restart: unless-stopped
+    mem_limit: 128m
+    networks:
+      - evalshield-net
+
+  sandbox:
+    build:
+      context: ./backend
+      dockerfile: sandbox/gateway/Dockerfile
+    platform: *default-platform
+    container_name: evalshield-sandbox
+    environment:
+      # ES9-P-03：默认 pool 模式（静态 worker 池，网关不再持有 docker.sock）。
+      # legacy（docker.sock 拉起一次性容器）仅限内部环境：
+      #   SANDBOX_MODE=legacy 时需自行恢复下方 docker.sock 挂载（见文件尾注释）
+      SANDBOX_MODE: ${SANDBOX_MODE:-pool}
+      SANDBOX_SHARED_DIR: /shared
+      SANDBOX_HOST: 0.0.0.0
+      SANDBOX_PORT: 9000
+      SANDBOX_WORKER_IMAGE: sandbox-worker:latest
+      SANDBOX_CPU_LIMIT: "1.0"
+      SANDBOX_MEM_LIMIT: "512m"
+      SANDBOX_PIDS_LIMIT: "64"
+      SANDBOX_TMPFS_SIZE: "64m"
+      SANDBOX_SECCOMP_PROFILE: "/app/seccomp-default.json"
+      SANDBOX_LOG_MAX_BYTES: "2097152"
+      SANDBOX_DATA_DIR: "/app/data/sandbox"
+      SANDBOX_DATA_VOLUME: "evalshield_evalshield_sandbox_data"
+      TZ: Asia/Shanghai
+    volumes:
+      # ES9-P-03：pool 模式移除 /var/run/docker.sock:ro 挂载（R0 方案）。
+      # - /var/run/docker.sock:/var/run/docker.sock:ro   # legacy only，勿在对外部署启用
+      - evalshield_sandbox_data:/app/data
+      - sandbox-shared:/shared
+      - ./backend/sandbox/seccomp-default.json:/app/seccomp-default.json:ro
+    ports:
+      - "${EVALSHIELD_BIND_HOST:-127.0.0.1}:${EVALSHIELD_SANDBOX_PORT:-9000}:9000"
+    restart: unless-stopped
+    mem_limit: 256m
+    networks:
+      - evalshield-net
+
+  # ES9-P-03：静态 worker 池（--profile sandbox 启用；replicas=2）
+  # 加固：network_mode none / read_only / cap_drop ALL / no-new-privileges /
+  # seccomp / tmpfs / pids_limit；不挂载 docker.sock，出网一律经网关反向代理。
+  sandbox-worker:
+    profiles: ["sandbox"]
+    build:
+      context: ./backend
+      dockerfile: sandbox/worker/Dockerfile
+    platform: *default-platform
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,noexec,nosuid
+      - /var/tmp:size=64m,noexec,nosuid
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+      - seccomp=./backend/sandbox/seccomp-default.json
+    pids_limit: 128
+    mem_limit: ${SANDBOX_MEM_LIMIT:-512m}
+    network_mode: "none"
+    volumes:
+      - sandbox-shared:/shared
+    deploy:
+      replicas: 2
+    restart: unless-stopped
+
+  # ES9-P-14：监控栈（--profile monitoring 启用；需 backend 侧 METRICS_ENABLED=true）
+  # 启动：METRICS_ENABLED=true METRICS_TOKEN=xxx docker compose --profile monitoring up -d
+  # 访问：Prometheus http://127.0.0.1:9090，Grafana http://127.0.0.1:3000（admin/admin）
+  prometheus:
+    profiles: ["monitoring"]
+    image: prom/prometheus:v2.53.0
+    platform: *default-platform
+    container_name: evalshield-prometheus
+    volumes:
+      - ./backend/deploy/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - evalshield_prometheus_data:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=15d
+    ports:
+      - "${EVALSHIELD_BIND_HOST:-127.0.0.1}:9090:9090"
+    restart: unless-stopped
+    mem_limit: 256m
+    networks:
+      - evalshield-net
+
+  grafana:
+    profiles: ["monitoring"]
+    image: grafana/grafana:11.1.0
+    platform: *default-platform
+    container_name: evalshield-grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      # 匿名关闭；首登后改密（RUNBOOK 告警阈值节）
+      TZ: Asia/Shanghai
+    volumes:
+      - evalshield_grafana_data:/var/lib/grafana
+      # 总览面板预置（Provisioning 自动导入，五面板：QPS/错误率、队列、token、沙箱P95、磁盘）
+      - ./backend/deploy/monitoring/dashboards:/var/lib/grafana/dashboards:ro
+      - ./backend/deploy/monitoring/grafana-provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "${EVALSHIELD_BIND_HOST:-127.0.0.1}:3000:3000"
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    mem_limit: 256m
+    networks:
+      - evalshield-net
+
+volumes:
+  evalshield_pgdata:
+  evalshield_reports:
+  evalshield_evidence:
+  evalshield_sandbox_data:
+  sandbox-shared:
+  evalshield_prometheus_data:
+  evalshield_grafana_data:
+
+networks:
+  evalshield-net:
+    driver: bridge

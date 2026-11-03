@@ -1,0 +1,23 @@
+# EvalShield OSS 公共仓最小自检工作流（优化15 §5.1 O-3 模板）
+# 落地方式：release_oss.sh [2] 拷入发布树 .github/workflows/ci.yml（私有 CI 资产已剥离，
+# 公共仓不得裸奔——L3 闸门：推上去之后仍自证清白，防 cherry-pick 回流夹带破坏）。
+# 门禁底线：能编译 + 能启动（EDITION=community）+ 能构建；路由基线对账留私有仓。
+name: oss-ci
+on: [push, pull_request]
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    env:
+      EDITION: community
+      # config.py F-02 fail-fast：SECRET_KEY 任何 EDITION 下空值/黑名单值/短于 32 位拒绝启动，
+      # CI 冒烟用合规占位值（非真实密钥，不持久化）
+      SECRET_KEY: oss-ci-smoke-kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: python -m compileall -q backend/app
+      - run: cd backend && pip install -r requirements.txt && python -c "from app.main import create_app; create_app()"
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: cd frontend && npm ci && npm run build
